@@ -1,0 +1,45 @@
+---
+- name: DISCOVER IOS VERSION 
+  hosts: iosxe_reserved
+  gather_facts: False
+  connection: local
+ 
+  tasks:
+    - name: run show version on remote devices
+      ios_command:
+        commands: show version
+      register: result_show_version
+
+    - name: Display output of show version command
+      debug: 
+        var: result_show_version.stdout
+
+    - name: Debugging result_show_version
+      debug:
+        var: result_show_version
+
+    - name: run show version and check to see if output contains IOS
+      ios_command:
+        commands: show version
+        wait_for:
+          - result[0] contains IOS
+
+    - name: run multiple commands on remote nodes
+      ios_command:
+        commands:
+          - show version
+          - show interfaces
+
+    - name: run multiple commands and evaluate the output
+      ios_command:
+        commands:
+          - show version
+          - show interfaces
+        wait_for:
+          - result[0] contains IOS
+          - result[1] contains Loopback
+
+    - name: Save output of show version command to a file
+      copy:
+        content: "{{ result_show_version.stdout[0] }}"
+        dest: "/home/devasc/DevascExperiments/network_programmability/IaCExperiments/test_show_run.txt"
